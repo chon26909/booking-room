@@ -21,6 +21,7 @@ type ToastState = {
         success: (message: string, position?: Position, direction?: Direction) => void;
         error: (message: string, position?: Position, direction?: Direction) => void;
         warning: (message: string, position?: Position, direction?: Direction) => void;
+        close: () => void;
     };
 };
 
@@ -63,6 +64,13 @@ export const useToastStore = create<ToastState>()((set) => ({
                 message,
                 position: position ?? state.position,
                 direction: direction ?? state.direction
-            }))
+            })),
+        close: () => {
+            set(() => {
+                return {
+                    isToastOpen: false
+                };
+            });
+        }
     }
 }));
