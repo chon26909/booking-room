@@ -10,7 +10,9 @@ export default function Home() {
 
     return (
         <main>
-            <Button onClick={() => toast.success('Update Successfully')}>show toast</Button>
+            <Button className='mt-52' onClick={() => toast.success('Update Successfully')}>
+                show toast
+            </Button>
             <Toast bodyClassName='p-5 w-[500px]' />
         </main>
     );
