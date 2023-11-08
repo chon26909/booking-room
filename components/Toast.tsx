@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, DragEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { useToastStore } from '@/store/toast';
 import Draggable, { DraggableEvent, DraggableEventHandler } from 'react-draggable';
 
@@ -32,48 +32,93 @@ const Toast: FC<IToast> = (props) => {
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [isToastOpen, duration]);
 
-    const [open, setOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
-    const ref = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleDrag = (event: DraggableEvent) => {
-        console.log(ref.current);
+    const toastRef = useRef<HTMLDivElement>(null);
 
-        if (event) {
-            console.log('event', event);
+    const handleMouseDown = (event: MouseEvent) => {
+        if (toastRef.current && containerRef.current) {
+            // console.log('offset', ref.current.offsetTop + ref.current.offsetHeight);
+            // console.log('event click', event.clientY);
+            //const shiftY = event.clientY - Number(ref.current.getBoundingClientRect().top);
+
+            const mousemove = (e: globalThis.MouseEvent) => {
+                if (toastRef.current && containerRef.current) {
+                    let diff = event.clientY - e.clientY;
+
+                    // console.log('diff move', diff);
+
+                    // console.log('shiftY', shiftY);
+                    // console.log('event clientY', e.clientY);
+                    // console.log('ref', ref.current?.getBoundingClientRect().top);
+                    // const newTop = event.clientY - shiftY - containerRef.current.getBoundingClientRect().top;
+                    // console.log('newTop', newTop);
+
+                    const percent = 80 / 100;
+
+                    const closeOffset = toastRef.current.clientHeight * percent;
+
+                    //console.log('ref.current', ref.current.clientHeight);
+
+                    console.log('diff', diff, 'closeOffset', closeOffset);
+
+                    if (diff > closeOffset) {
+                        toast.close();
+                        setIsOpen(false);
+                    }
+
+                    console.log('opacity', 1 - diff / closeOffset);
+
+                    toastRef.current.style.transform = `translateY(-${diff}px)`;
+                    toastRef.current.style.opacity = String(1 - diff / closeOffset);
+                }
+            };
+
+            document.addEventListener('mousemove', mousemove);
+
+            document.addEventListener('mouseup', () => {
+                if (isOpen && toastRef.current) {
+                    toastRef.current.style.transform = `translateY(${0}px)`;
+                    toastRef.current.style.opacity = '1';
+                }
+
+                document.removeEventListener('mousemove', mousemove);
+            });
         }
     };
 
     useEffect(() => {
-        if (open) {
-            console.log('if open', open);
+        if (isOpen) {
+            //console.log('if isOpen', isOpen);
 
             setTimeout(() => {
-                setOpen(false);
-                console.log('close', open);
+                setIsOpen(false);
+                //console.log('close', isOpen);
             }, 500);
         } else {
-            setOpen(isToastOpen);
+            setIsOpen(isToastOpen);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isToastOpen]);
 
     return (
         <>
-            {open && (
-                <div className={`fixed w-full ${toastPositions[position]} bg-slate-500`}>
-                    <Draggable ref={ref} axis='y' onDrag={handleDrag}>
-                        <div
-                            className={[
-                                bodyClassName,
-                                toastColors[toastType],
-                                isToastOpen ? 'translate-y-0' : '-translate-y-52',
-                                'transition duration-300 mx-auto mt-5 rounded-lg text-white text-lg font-bold select-none'
-                            ].join(' ')}
-                        >
-                            {message}
-                        </div>
-                    </Draggable>
+            {isOpen && (
+                <div ref={containerRef} className={`fixed w-full pt-20 ${toastPositions[position]} `}>
+                    <div
+                        ref={toastRef}
+                        className={[
+                            bodyClassName,
+                            toastColors[toastType],
+                            isToastOpen ? 'translate-y-0' : '-translate-y-52',
+                            'transition duration-300 mx-auto rounded-lg text-white text-lg font-bold select-none cursor-grab'
+                        ].join(' ')}
+                        onMouseDown={handleMouseDown}
+                    >
+                        {message}
+                    </div>
                 </div>
             )}
         </>
