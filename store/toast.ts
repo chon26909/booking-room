@@ -18,7 +18,7 @@ type ToastState = {
     direction: Direction;
     duration: number;
     toast: {
-        success: (message: string, position?: Position, direction?: Direction) => void;
+        success: (message: string, duration?: number, position?: Position, direction?: Direction) => void;
         error: (message: string, position?: Position, direction?: Direction) => void;
         warning: (message: string, position?: Position, direction?: Direction) => void;
         close: () => void;
@@ -26,26 +26,27 @@ type ToastState = {
 };
 
 export const useToastStore = create<ToastState>()((set) => ({
-    isToastOpen: true,
+    isToastOpen: false,
     closeToast: () => set(() => ({ isToastOpen: false })),
-    message: 'test',
+    message: '',
     toastType: 'success',
     position: 'topCenter',
     direction: 'fadeUp',
     duration: 3000,
     toast: {
-        success: (message, position?, direction?) => {
+        success: (message, duration?, position?, direction?) => {
             set((state) => {
-                // setTimeout(() => {
-                //     state.closeToast();
-                // }, state.duration);
+                setTimeout(() => {
+                    state.closeToast();
+                }, duration);
 
                 return {
                     isToastOpen: true,
                     toastType: 'success',
                     message,
                     position: position ?? state.position,
-                    direction: direction ?? state.direction
+                    direction: direction ?? state.direction,
+                    duration: duration ?? state.duration
                 };
             });
         },

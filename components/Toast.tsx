@@ -1,7 +1,6 @@
 'use client';
 import { FC, DragEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { useToastStore } from '@/store/toast';
-import Draggable, { DraggableEvent, DraggableEventHandler } from 'react-draggable';
 
 interface IToast {
     bodyClassName?: string;
@@ -38,50 +37,42 @@ const Toast: FC<IToast> = (props) => {
 
     const toastRef = useRef<HTMLDivElement>(null);
 
+    const [isOverTouch, setIsOverTouch] = useState(false);
+
     const handleMouseDown = (event: MouseEvent) => {
         if (toastRef.current && containerRef.current) {
-            // console.log('offset', ref.current.offsetTop + ref.current.offsetHeight);
-            // console.log('event click', event.clientY);
-            //const shiftY = event.clientY - Number(ref.current.getBoundingClientRect().top);
-
             const mousemove = (e: globalThis.MouseEvent) => {
                 if (toastRef.current && containerRef.current) {
                     let diff = event.clientY - e.clientY;
-
-                    // console.log('diff move', diff);
-
-                    // console.log('shiftY', shiftY);
-                    // console.log('event clientY', e.clientY);
-                    // console.log('ref', ref.current?.getBoundingClientRect().top);
-                    // const newTop = event.clientY - shiftY - containerRef.current.getBoundingClientRect().top;
-                    // console.log('newTop', newTop);
 
                     const percent = 80 / 100;
 
                     const closeOffset = toastRef.current.clientHeight * percent;
 
-                    //console.log('ref.current', ref.current.clientHeight);
-
                     console.log('diff', diff, 'closeOffset', closeOffset);
 
                     if (diff > closeOffset) {
-                        toast.close();
-                        setIsOpen(false);
+                        setIsOverTouch(true);
                     }
 
-                    console.log('opacity', 1 - diff / closeOffset);
+                    console.log('opacity', 1 - diff / closeOffset / 2);
 
                     toastRef.current.style.transform = `translateY(-${diff}px)`;
-                    toastRef.current.style.opacity = String(1 - diff / closeOffset);
+                    toastRef.current.style.opacity = String(1 - diff / closeOffset / 2);
                 }
             };
 
             document.addEventListener('mousemove', mousemove);
 
             document.addEventListener('mouseup', () => {
-                if (isOpen && toastRef.current) {
-                    toastRef.current.style.transform = `translateY(${0}px)`;
-                    toastRef.current.style.opacity = '1';
+                if (isOverTouch) {
+                    toast.close();
+                    setIsOpen(false);
+                } else {
+                    if (isOpen && toastRef.current) {
+                        toastRef.current.style.transform = `translateY(${0}px)`;
+                        toastRef.current.style.opacity = '1';
+                    }
                 }
 
                 document.removeEventListener('mousemove', mousemove);
@@ -89,13 +80,51 @@ const Toast: FC<IToast> = (props) => {
         }
     };
 
+    const handleTouchStart = (event: React.TouchEvent) => {
+        setIsOverTouch(false);
+
+        if (toastRef.current && containerRef.current) {
+            const mousemove = (e: globalThis.TouchEvent) => {
+                if (toastRef.current && containerRef.current) {
+                    let diff = event.touches[0].clientY - e.touches[0].clientY;
+
+                    const percent = 80 / 100;
+
+                    const closeOffset = toastRef.current.clientHeight * percent;
+
+                    if (diff > closeOffset) {
+                        setIsOverTouch(true);
+                    }
+
+                    console.log('opacity', 1 - diff / closeOffset / 2);
+
+                    toastRef.current.style.transform = `translateY(-${diff}px)`;
+                    toastRef.current.style.opacity = String(1 - diff / closeOffset / 2);
+                }
+            };
+
+            document.addEventListener('touchmove', mousemove);
+
+            document.addEventListener('touchend', () => {
+                if (isOverTouch) {
+                    toast.close();
+                    setIsOpen(false);
+                } else {
+                    if (isOpen && toastRef.current) {
+                        toastRef.current.style.transform = `translateY(${0}px)`;
+                        toastRef.current.style.opacity = '1';
+                    }
+                }
+
+                document.removeEventListener('touchmove', mousemove);
+            });
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
-            //console.log('if isOpen', isOpen);
-
             setTimeout(() => {
                 setIsOpen(false);
-                //console.log('close', isOpen);
             }, 500);
         } else {
             setIsOpen(isToastOpen);
@@ -113,9 +142,10 @@ const Toast: FC<IToast> = (props) => {
                             bodyClassName,
                             toastColors[toastType],
                             isToastOpen ? 'translate-y-0' : '-translate-y-52',
-                            'transition duration-300 mx-auto rounded-lg text-white text-lg font-bold select-none cursor-grab'
+                            'transition duration-150 mx-auto rounded-lg text-white text-lg font-bold select-none cursor-grab'
                         ].join(' ')}
                         onMouseDown={handleMouseDown}
+                        onTouchStart={handleTouchStart}
                     >
                         {message}
                     </div>
