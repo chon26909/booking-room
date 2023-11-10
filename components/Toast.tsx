@@ -22,7 +22,7 @@ const toastPositions = {
 const Toast: FC<IToast> = (props) => {
     const { bodyClassName } = props;
 
-    const { isToastOpen, message, toastType, position = 'topCenter', direction, closeToast, toast, duration } = useToastStore();
+    const { isToastOpen, message, toastType, position, toast } = useToastStore();
 
     // useEffect(() => {
     //     setTimeout(() => {
