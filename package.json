@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@nextui-org/react": "^2.2.2",
+    "@tanstack/react-query": "^5.8.1",
+    "axios": "^1.6.1",
     "eslint-plugin-react-hooks": "^5.0.0-canary-ce2bc58a9-20231102",
     "framer-motion": "^10.16.4",
     "next": "14.0.1",
