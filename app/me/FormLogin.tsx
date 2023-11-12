@@ -20,6 +20,8 @@ const FormLogin = (props: IFormLoginProps) => {
         onSuccess({ data }) {
             console.log('token', data.data);
             props.setAccessToken(data.data.accessToken);
+
+            sessionStorage.setItem('token', data.data.accessToken);
         }
     });
 
@@ -45,8 +47,22 @@ const FormLogin = (props: IFormLoginProps) => {
         <div className='bg-blue-300 min-h-screen flex justify-center items-center'>
             <div className='bg-white p-7 w-[500px] rounded-md'>
                 <div className='text-3xl font-bold text-center my-5'>Login </div>
-                <Input ref={emailRef} type='text' label='Email' variant='bordered' className='w-full my-5' defaultValue='demo@gmail.com' />
-                <Input ref={passwordRef} type='password' label='Password' variant='bordered' className='w-full my-5' defaultValue='1234' />
+                <Input
+                    ref={emailRef}
+                    type='text'
+                    label='Email'
+                    variant='bordered'
+                    className='w-full my-5'
+                    defaultValue='demo@gmail.com'
+                />
+                <Input
+                    ref={passwordRef}
+                    type='password'
+                    label='Password'
+                    variant='bordered'
+                    className='w-full my-5'
+                    defaultValue='1234'
+                />
                 <Button fullWidth onClick={handleSubmit}>
                     Submit
                 </Button>
