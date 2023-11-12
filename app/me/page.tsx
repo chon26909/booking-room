@@ -4,12 +4,19 @@ import React, { createContext, useEffect, useState } from 'react';
 import FormLogin from './FormLogin';
 import Profile, { IUser } from './Profile';
 import axios from 'axios';
-// const UserContext = createContext(initialState);
+
+const initialState = {
+    firstname: '',
+    lastname: '',
+    email: ''
+};
+
+export const UserContext = createContext(initialState);
 
 const ProfilePage = () => {
     const [accessToken, setAccessToken] = useState('');
 
-    const [userData, setUserData] = useState<IUser>();
+    const [userData, setUserData] = useState<IUser>(initialState);
 
     useEffect(() => {
         const getUserProfile = async () => {
@@ -28,9 +35,9 @@ const ProfilePage = () => {
     }, [accessToken]);
 
     return (
-        <>
-            {userData ? <Profile data={userData} /> : <FormLogin setAccessToken={setAccessToken} />}
-        </>
+        <UserContext.Provider value={userData}>
+            {accessToken ? <Profile /> : <FormLogin setAccessToken={setAccessToken} />}
+        </UserContext.Provider>
     );
 };
 
